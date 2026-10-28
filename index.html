@@ -1,0 +1,842 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Perú · 5000 años</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink:#0b0a09; --ink-2:#14110e; --bone:#efe8dc; --muted:rgba(239,232,220,.62);
+    --red:#d91023; --red-2:#ff2a3d; --gold:#c9a24a; --paper:#e9dfcb;
+    --display:"Anton", Impact, sans-serif; --serif:"Instrument Serif", Georgia, serif;
+    --ui:"Inter Tight", system-ui, sans-serif;
+    --silk:cubic-bezier(.45,.05,.55,.95);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:var(--ink);color:var(--bone);overflow:hidden;font-family:var(--ui);-webkit-font-smoothing:antialiased}
+  body{cursor:none}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:none}
+  img{display:block;user-select:none;-webkit-user-drag:none}
+  @media (hover:none){ body,button{cursor:auto} .cursor{display:none} }
+
+  /* ---------- stage ---------- */
+  .stage{position:fixed;inset:0;overflow:hidden;background:var(--ink);touch-action:none}
+  .scene{position:absolute;inset:0;overflow:hidden;visibility:hidden;will-change:clip-path,transform}
+  .scene[data-id="intro"]{visibility:visible}
+  .inner{position:absolute;inset:0;transform-origin:50% 50%;filter:blur(0px) brightness(1)}
+  .px{position:absolute;inset:-5%;transform:translate3d(calc(var(--mx,0)*var(--d,1)*1px),calc(var(--my,0)*var(--d,1)*1px),0)}
+  .px > img,.cover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .shade-b{position:absolute;inset:0;background:linear-gradient(to top,rgba(11,10,9,.95) 0%,rgba(11,10,9,.55) 38%,rgba(11,10,9,.05) 70%)}
+  .shade-l{position:absolute;inset:0;background:linear-gradient(to right,rgba(11,10,9,.92) 0%,rgba(11,10,9,.5) 45%,rgba(11,10,9,0) 75%)}
+  .shade-r{position:absolute;inset:0;background:linear-gradient(to left,rgba(11,10,9,.92) 0%,rgba(11,10,9,.45) 45%,rgba(11,10,9,0) 75%)}
+  .grain{position:fixed;inset:-50%;pointer-events:none;z-index:40;opacity:.09;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    animation:grain 1s steps(6) infinite}
+  @keyframes grain{0%{transform:translate(0,0)}20%{transform:translate(-4%,3%)}40%{transform:translate(3%,-5%)}60%{transform:translate(-6%,-2%)}80%{transform:translate(5%,4%)}100%{transform:translate(0,0)}}
+  .vignette{position:fixed;inset:0;pointer-events:none;z-index:39;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.6) 100%)}
+
+  /* ---------- type ---------- */
+  .split{display:inline}
+  .split .w{display:inline-block;overflow:hidden;vertical-align:top;padding:.14em .02em .06em;margin:-.14em -.02em -.06em}
+  .split .c{display:inline-block;will-change:transform}
+  .ln{display:block;overflow:hidden;padding-bottom:.08em}
+  .ln > span{display:block;will-change:transform}
+  .kicker{font-family:var(--ui);font-weight:500;font-size:clamp(11px,1vw,13px);letter-spacing:.32em;text-transform:uppercase;color:var(--muted)}
+  .kicker b{color:var(--red-2);font-weight:600}
+  .mega{font-family:var(--display);font-weight:400;line-height:.82;letter-spacing:-.01em;text-transform:uppercase}
+  .outline{color:transparent;-webkit-text-stroke:1.5px rgba(239,232,220,.85)}
+  .serif{font-family:var(--serif);font-weight:400}
+  .lead{font-family:var(--serif);font-size:clamp(22px,2.6vw,42px);line-height:1.08;max-width:20ch}
+  .lead em{color:var(--gold);font-style:italic}
+  .stat{display:flex;align-items:baseline;gap:.35em;font-family:var(--display);font-size:clamp(44px,6vw,96px);line-height:.9}
+  .stat small{font-family:var(--ui);font-size:clamp(11px,1vw,13px);letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
+  .tag{display:inline-flex;align-items:center;gap:.6em}
+  .tag::before{content:"";width:8px;height:8px;background:var(--red);border-radius:50%;box-shadow:0 0 14px var(--red)}
+
+  /* ---------- cards ---------- */
+  .card{position:absolute;width:clamp(130px,15vw,230px);aspect-ratio:3/4;padding:0;text-align:left;z-index:5}
+  .card-inner{position:absolute;inset:0;border-radius:6px;overflow:hidden;background:#000;box-shadow:0 30px 60px -20px rgba(0,0,0,.8);
+    transition:transform .6s cubic-bezier(.25,.1,.25,1),box-shadow .6s}
+  .card-inner img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s cubic-bezier(.25,.1,.25,1),filter .6s;filter:saturate(.85)}
+  .card:hover .card-inner{transform:translateY(-8px) rotate(-1deg);box-shadow:0 40px 80px -20px rgba(217,16,35,.45)}
+  .card:hover .card-inner img{transform:scale(1.08);filter:saturate(1.1)}
+  .card-cap{position:absolute;left:0;right:0;bottom:0;padding:28px 12px 10px;background:linear-gradient(to top,rgba(0,0,0,.9),transparent);display:flex;flex-direction:column;gap:2px}
+  .card-cap span{font-family:var(--display);font-size:clamp(15px,1.5vw,22px);text-transform:uppercase;letter-spacing:.01em;line-height:1}
+  .card-cap em{font-style:normal;font-size:11px;letter-spacing:.16em;color:var(--muted)}
+  .plus{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:50%;background:rgba(239,232,220,.92);color:var(--ink);display:grid;place-items:center;font-style:normal;font-size:17px;font-weight:500;line-height:1}
+  .plus::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:1px solid rgba(239,232,220,.7);animation:ping 2s cubic-bezier(.25,.1,.25,1) infinite}
+  @keyframes ping{0%{transform:scale(.7);opacity:1}100%{transform:scale(1.6);opacity:0}}
+
+  /* ---------- scene specifics ---------- */
+  .glow{position:absolute;border-radius:50%;filter:blur(60px);pointer-events:none}
+  .glow.red{width:46vmax;height:46vmax;left:8%;top:18%;background:radial-gradient(circle,rgba(217,16,35,.55),transparent 65%)}
+  .glow.gold{width:40vmax;height:40vmax;right:6%;top:30%;background:radial-gradient(circle,rgba(201,162,74,.42),transparent 65%)}
+  .s0-img{position:absolute;inset:0;clip-path:inset(42% 38% 42% 38%)}
+  .s0-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2vh;text-align:center;z-index:3}
+  .s0-title{font-size:clamp(110px,27vw,420px);mix-blend-mode:difference}
+  .s0-sub{font-family:var(--serif);font-style:italic;font-size:clamp(20px,2.4vw,36px);color:var(--bone)}
+
+  .content{position:absolute;z-index:4}
+  .bl{left:clamp(20px,5vw,80px);bottom:clamp(110px,15vh,170px)}
+  .tl{left:clamp(20px,5vw,80px);top:clamp(80px,13vh,140px)}
+  .stack{display:flex;flex-direction:column;gap:clamp(10px,1.8vh,22px)}
+
+  .s1-year{font-size:clamp(90px,17vw,280px)}
+  .s2-title{font-size:clamp(46px,10.5vw,190px);white-space:nowrap}
+  .s3-year{position:absolute;right:-1vw;top:8vh;font-size:clamp(120px,30vw,520px);opacity:.9;z-index:2}
+  .flash{position:absolute;inset:0;background:radial-gradient(circle at 60% 45%,#fff3d6,#ff7a2a 35%,transparent 70%);mix-blend-mode:screen;opacity:0;visibility:hidden;z-index:6;pointer-events:none}
+
+  .scene[data-id="rebelion"]{background:var(--paper);color:var(--ink)}
+  .scene[data-id="rebelion"] .kicker{color:rgba(11,10,9,.6)}
+  .slash{position:absolute;height:clamp(10px,1.4vh,18px);background:var(--red);transform-origin:0 50%;z-index:1}
+  .s4-img{position:absolute;right:clamp(10px,8vw,160px);top:50%;height:min(78vh,760px);margin-top:calc(min(78vh,760px) / -2);aspect-ratio:257/300;padding:0;z-index:2}
+  .s4-img img{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply}
+  .s4-year{font-size:clamp(100px,19vw,320px);color:var(--red)}
+  .quote{font-family:var(--serif);font-style:italic;font-size:clamp(22px,2.5vw,40px);line-height:1.1;max-width:22ch}
+
+  .s5-year{font-size:clamp(90px,16vw,260px)}
+  .s5b{position:absolute;inset:0;clip-path:inset(0% 0% 0% 100%);z-index:3}
+
+  .s6b{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;z-index:3;pointer-events:none}
+  .s6b > div{position:relative;overflow:hidden;pointer-events:auto}
+  .s6b .pl{clip-path:inset(0% 100% 0% 0%)}
+  .s6b .pr{clip-path:inset(0% 0% 0% 100%)}
+  .s6b img{filter:grayscale(1) contrast(1.1) brightness(.75)}
+  .s6b .pl img{object-position:50% 20%}
+  .s6b .pr img{object-position:50% 15%}
+  .s6-quote{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:min(92vw,1100px);text-align:center;z-index:5;font-family:var(--serif);font-style:italic;font-size:clamp(34px,6vw,104px);line-height:.95;text-shadow:0 10px 40px rgba(0,0,0,.6);pointer-events:none}
+  .s6-attr{position:absolute;left:50%;top:calc(44% + clamp(70px,10vw,170px));transform:translateX(-50%);z-index:5;white-space:nowrap}
+  .panel-name{position:absolute;left:clamp(16px,3vw,40px);bottom:clamp(110px,15vh,170px);z-index:4;display:flex;flex-direction:column;gap:6px;text-align:left;padding:0}
+  .panel-name .mega{font-size:clamp(28px,4vw,64px)}
+
+  .mosaic{position:absolute;inset:0;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:6px;transform-origin:50% 50%}
+  .mosaic > div{position:relative;overflow:hidden;background:#000}
+  .s7-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:2.4vh;z-index:3}
+  .s7-title{font-size:clamp(110px,24vw,380px)}
+  .btn{display:inline-flex;align-items:center;gap:12px;padding:16px 26px;border-radius:999px;border:1px solid rgba(239,232,220,.4);font-size:13px;letter-spacing:.24em;text-transform:uppercase;font-weight:500;transition:background .4s,color .4s,border-color .4s}
+  .btn:hover{background:var(--bone);color:var(--ink);border-color:var(--bone)}
+  .btn.solid{background:var(--red);border-color:var(--red);color:#fff}
+  .btn.solid:hover{background:var(--bone);color:var(--ink);border-color:var(--bone)}
+
+  /* ---------- HUD ---------- */
+  .hud-top{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;justify-content:space-between;align-items:center;padding:clamp(14px,2.4vh,24px) clamp(16px,3vw,40px);pointer-events:none}
+  .hud-top > *{pointer-events:auto}
+  .logo{display:flex;align-items:center;gap:12px;font-family:var(--display);font-size:22px;letter-spacing:.02em}
+  .logo i{width:22px;height:14px;background:linear-gradient(to right,var(--red) 33.3%,#fff 33.3% 66.6%,var(--red) 66.6%);display:block;border-radius:2px}
+  .logo span{font-family:var(--ui);font-size:11px;letter-spacing:.24em;color:var(--muted);text-transform:uppercase}
+  .hud-r{display:flex;align-items:center;gap:18px;font-size:12px;letter-spacing:.18em}
+  .clock{font-variant-numeric:tabular-nums;color:var(--muted)}
+  .snd{display:flex;align-items:flex-end;gap:2px;height:14px;padding:4px 0}
+  .snd b{width:2px;background:var(--bone);height:100%;transform-origin:bottom;animation:eq 1s ease-in-out infinite}
+  .snd b:nth-child(2){animation-delay:-.3s}.snd b:nth-child(3){animation-delay:-.6s}.snd b:nth-child(4){animation-delay:-.15s}
+  .snd.off b{animation:none;transform:scaleY(.2)}
+  @keyframes eq{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+  .snd-btn{display:flex;align-items:center;gap:10px;font-size:11px;letter-spacing:.2em;text-transform:uppercase}
+
+  .marquee{position:fixed;left:0;right:0;top:clamp(54px,8vh,72px);z-index:29;overflow:hidden;pointer-events:none;opacity:.5;mask-image:linear-gradient(to right,transparent,#000 15%,#000 85%,transparent)}
+  .marquee div{display:flex;width:max-content;animation:mq 50s linear infinite;font-size:10px;letter-spacing:.32em;text-transform:uppercase;white-space:nowrap}
+  .marquee span{padding-right:3em}
+  @keyframes mq{to{transform:translateX(-50%)}}
+
+  .hud-bot{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:0 clamp(16px,3vw,40px) clamp(14px,2.4vh,24px);background:linear-gradient(to top,rgba(11,10,9,.7),transparent)}
+  .chapters{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-bottom:12px}
+  .chap{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:6px 0;text-align:left;opacity:.45;transition:opacity .4s;min-width:0}
+  .chap:hover,.chap.on{opacity:1}
+  .chap .n{font-size:10px;letter-spacing:.2em;color:var(--muted);font-variant-numeric:tabular-nums}
+  .chap .l{font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .chap.on .n{color:var(--red-2)}
+  .bar{position:relative;height:18px;display:flex;align-items:center;touch-action:none}
+  .track{position:relative;width:100%;height:2px;background:rgba(239,232,220,.18)}
+  .fill{position:absolute;left:0;top:0;bottom:0;width:100%;background:var(--bone);transform-origin:0 50%;transform:scaleX(0)}
+  .tick{position:absolute;top:-3px;width:1px;height:8px;background:rgba(239,232,220,.45)}
+  .head{position:absolute;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:var(--red);box-shadow:0 0 12px var(--red);left:0}
+  .hint{position:fixed;right:clamp(16px,3vw,40px);bottom:clamp(96px,13vh,120px);z-index:30;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);text-align:right;line-height:1.8;pointer-events:none}
+  .pp{position:fixed;left:50%;top:50%;z-index:31;width:84px;height:84px;margin:-42px;border-radius:50%;background:rgba(11,10,9,.5);backdrop-filter:blur(8px);display:grid;place-items:center;pointer-events:none;opacity:0}
+  @media (max-width:760px){
+    .chap .l{display:none}
+    .hint{display:none}
+    .card{width:clamp(96px,26vw,140px)}
+    .s4-img{right:-8vw;height:52vh;margin-top:-26vh;opacity:.9}
+    .s6b{grid-template-columns:1fr 1fr}
+    .marquee{display:none}
+  }
+
+  /* ---------- gate ---------- */
+  .gate{position:fixed;inset:0;z-index:50;background:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;text-align:center;padding:24px;clip-path:inset(0% 0% 0% 0%)}
+  .gate .mega{font-size:clamp(80px,16vw,240px)}
+  .gate p{max-width:46ch;color:var(--muted);font-size:14px;line-height:1.6}
+
+  /* ---------- drawer ---------- */
+  .scrim{position:fixed;inset:0;z-index:44;background:rgba(11,10,9,.55);backdrop-filter:blur(6px);opacity:0;visibility:hidden}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100vw);z-index:45;background:var(--ink-2);border-left:1px solid rgba(239,232,220,.1);display:flex;flex-direction:column;overflow:auto;clip-path:inset(0% 0% 0% 100%);visibility:hidden}
+  .drawer-img{position:relative;height:52vh;min-height:280px;overflow:hidden;flex:none}
+  .drawer-img img{width:100%;height:100%;object-fit:cover;object-position:50% 22%}
+  .drawer-img::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,var(--ink-2),transparent 55%)}
+  .drawer-body{padding:0 clamp(20px,3vw,40px) 40px;margin-top:-60px;position:relative;display:flex;flex-direction:column;gap:16px}
+  .drawer-body .mega{font-size:clamp(44px,6vw,80px)}
+  .drawer-body p{font-family:var(--serif);font-size:clamp(19px,1.6vw,23px);line-height:1.35;color:rgba(239,232,220,.86)}
+  .drawer-body .credit{font-family:var(--ui);font-size:11px;letter-spacing:.08em;color:rgba(239,232,220,.4)}
+  .close{position:absolute;top:18px;right:18px;z-index:2;width:44px;height:44px;border-radius:50%;background:rgba(11,10,9,.6);backdrop-filter:blur(6px);display:grid;place-items:center;font-size:20px;transition:background .3s,transform .5s}
+  .close:hover{background:var(--red);transform:rotate(90deg)}
+
+  /* ---------- cursor ---------- */
+  .cursor{position:fixed;left:0;top:0;z-index:60;pointer-events:none}
+  .cursor .dot{position:absolute;width:6px;height:6px;margin:-3px;border-radius:50%;background:var(--bone);mix-blend-mode:difference}
+  .cursor .ring{position:absolute;width:40px;height:40px;margin:-20px;border-radius:50%;border:1px solid rgba(239,232,220,.6);display:grid;place-items:center;transition:width .45s cubic-bezier(.25,.1,.25,1),height .45s cubic-bezier(.25,.1,.25,1),margin .45s cubic-bezier(.25,.1,.25,1),background .45s,border-color .45s}
+  .cursor .ring span{font-size:10px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:var(--ink);opacity:0;transition:opacity .3s}
+  .cursor.big .ring{width:86px;height:86px;margin:-43px;background:var(--bone);border-color:var(--bone)}
+  .cursor.big .ring span{opacity:1}
+  .cursor.big .dot{opacity:0}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useLayoutEffect, useRef, useCallback } = React;
+gsap.registerPlugin(CustomEase);
+// Eases lifted from unitedcarriers.com
+CustomEase.create("silk", "0.45, 0.05, 0.55, 0.95");
+CustomEase.create("smooth", "0.25, 0.1, 0.25, 1");
+
+const DUR = 45;
+const A = (f) => `assets/${f}.jpg`;
+
+const SCENES = [
+  { id: "intro",         start: 0,    label: "Prólogo",        year: "" },
+  { id: "caral",         start: 4.5,  label: "Caral",          year: "3000 a.C." },
+  { id: "inca",          start: 9.5,  label: "Tahuantinsuyo",  year: "1438" },
+  { id: "conquista",     start: 15.5, label: "Conquista",      year: "1532" },
+  { id: "rebelion",      start: 21.5, label: "Rebelión",       year: "1780" },
+  { id: "independencia", start: 26.5, label: "Independencia",  year: "1821" },
+  { id: "pacifico",      start: 33,   label: "Guerra del Pacífico", year: "1879" },
+  { id: "final",         start: 40,   label: "Perú",           year: "Hoy" },
+];
+
+const PEOPLE = {
+  pachacutec: { name: "Pachacútec", role: "Sapa Inca · c. 1438–1471", img: "pachacutec",
+    bio: "Transformó el pequeño reino del Cusco en el Tahuantinsuyo, el imperio más extenso de la América precolombina. Reorganizó el Estado, impulsó la red de caminos y se le atribuye la construcción de Machu Picchu.",
+    credit: "Retrato colonial cusqueño, s. XVIII · Brooklyn Museum" },
+  atahualpa: { name: "Atahualpa", role: "Último Sapa Inca · c. 1500–1533", img: "atahualpa",
+    bio: "Venció a su hermano Huáscar en la guerra civil por el trono. Fue capturado en Cajamarca en 1532; pagó un rescate de una habitación llena de oro y plata, y aun así fue ejecutado en 1533.",
+    credit: "Escuela cusqueña, s. XVIII · Brooklyn Museum" },
+  pizarro: { name: "Francisco Pizarro", role: "Conquistador · c. 1478–1541", img: "pizarro",
+    bio: "Con apenas 168 hombres emboscó al ejército inca en Cajamarca el 16 de noviembre de 1532 y capturó a Atahualpa. Fundó Lima en 1535 y murió asesinado allí en 1541.",
+    credit: "Amable-Paul Coutan, 1835 · Palacio de Versalles" },
+  tupac: { name: "Túpac Amaru II", role: "José Gabriel Condorcanqui · 1738–1781", img: "tupac",
+    bio: "Curaca de Tungasuca, encabezó en 1780 la mayor rebelión indígena contra el dominio colonial español. Junto a Micaela Bastidas fue ejecutado en la Plaza de Armas del Cusco el 18 de mayo de 1781.",
+    credit: "Acuarela anónima, s. XIX" },
+  sanmartin: { name: "José de San Martín", role: "Libertador · 1778–1850", img: "sanmartin",
+    bio: "Tras cruzar los Andes y liberar Chile, desembarcó en Paracas en 1820. Proclamó la independencia del Perú en Lima el 28 de julio de 1821 y gobernó como Protector del Perú.",
+    credit: "Retrato al óleo, s. XIX" },
+  bolivar: { name: "Simón Bolívar", role: "Libertador · 1783–1830", img: "bolivar",
+    bio: "Llegó al Perú en 1823 para conducir la guerra final. Las victorias de Junín y de Ayacucho (esta última bajo el mando de Antonio José de Sucre) sellaron la independencia del Perú y de Sudamérica en 1824.",
+    credit: "Arturo Michelena, 1895" },
+  grau: { name: "Miguel Grau", role: "Gran Almirante · 1834–1879", img: "grau",
+    bio: "Al mando del monitor Huáscar mantuvo en jaque a la escuadra chilena durante seis meses. Rescató a náufragos enemigos, lo que le valió el nombre de «Caballero de los Mares». Murió en el combate de Angamos el 8 de octubre de 1879.",
+    credit: "Retrato fotográfico, c. 1879" },
+  bolognesi: { name: "Francisco Bolognesi", role: "Coronel · 1816–1880", img: "bolognesi",
+    bio: "Comandó la defensa del Morro de Arica. Ante la intimación de rendición respondió: «Tengo deberes sagrados que cumplir y los cumpliré hasta quemar el último cartucho». Murió en el asalto del 7 de junio de 1880.",
+    credit: "Fotografía, 1864" },
+  caceres: { name: "Andrés A. Cáceres", role: "El Brujo de los Andes · 1833–1923", img: "caceres",
+    bio: "Herido en la defensa de Lima, se replegó a la sierra central y organizó la Campaña de la Breña (1881–1883), una guerra de guerrillas con montoneros campesinos contra la ocupación chilena. Fue luego presidente del Perú.",
+    credit: "Retrato al óleo, s. XIX" },
+};
+
+const fmt = (n) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+const mmss = (t) => `00:${String(Math.floor(t)).padStart(2, "0")}`;
+
+/* ---------------- text helpers ---------------- */
+function Split({ text, by = "chars", className = "" }) {
+  const words = text.split(" ");
+  return (
+    <span className={"split " + className} aria-label={text}>
+      {words.map((w, i) => (
+        <React.Fragment key={i}>
+          <span className="w" aria-hidden="true">
+            {by === "chars" ? [...w].map((c, j) => <span className="c" key={j}>{c}</span>) : <span className="c">{w}</span>}
+          </span>
+          {i < words.length - 1 ? " " : ""}
+        </React.Fragment>
+      ))}
+    </span>
+  );
+}
+const Lines = ({ lines, className = "", style }) => (
+  <div className={className} style={style}>{lines.map((l, i) => <span className="ln" key={i}><span>{l}</span></span>)}</div>
+);
+
+const SCRAMBLE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#*";
+function scramble(el, text) {
+  if (!el) return;
+  clearInterval(el._sc);
+  let f = 0;
+  el._sc = setInterval(() => {
+    el.textContent = [...text].map((c, i) => (c === " " || i < f / 2 ? c : SCRAMBLE[(Math.random() * SCRAMBLE.length) | 0])).join("");
+    if (++f > text.length * 2) { clearInterval(el._sc); el.textContent = text; }
+  }, 26);
+}
+
+function Card({ id, onOpen, style, className = "" }) {
+  const p = PEOPLE[id];
+  return (
+    <button className={"card " + className} data-person={id} data-cursor="Ver" style={style} onClick={() => onOpen(id)} aria-label={"Ver ficha de " + p.name}>
+      <div className="card-inner">
+        <img src={A(p.img)} alt={p.name} />
+        <div className="card-cap"><span>{p.name}</span><em>{p.role.split("·").pop().trim()}</em></div>
+        <i className="plus">+</i>
+      </div>
+    </button>
+  );
+}
+
+/* ---------------- procedural score (WebAudio) ---------------- */
+const Sound = {
+  ctx: null, master: null, muted: false,
+  init() {
+    if (this.ctx) return;
+    const ctx = (this.ctx = new (window.AudioContext || window.webkitAudioContext)());
+    this.master = ctx.createGain(); this.master.gain.value = 0.9; this.master.connect(ctx.destination);
+    const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 220;
+    const g = ctx.createGain(); g.gain.value = 0; lp.connect(g); g.connect(this.master);
+    [[55, "sawtooth"], [55.6, "sawtooth"], [82.4, "sine"], [110, "triangle"]].forEach(([f, t]) => {
+      const o = ctx.createOscillator(); o.type = t; o.frequency.value = f; o.connect(lp); o.start();
+    });
+    const lfo = ctx.createOscillator(); lfo.frequency.value = 0.08; const lg = ctx.createGain(); lg.gain.value = 90;
+    lfo.connect(lg); lg.connect(lp.frequency); lfo.start();
+    g.gain.linearRampToValueAtTime(0.07, ctx.currentTime + 3);
+    this.noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+    const d = this.noise.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  },
+  drum(power = 1) {
+    if (!this.ctx || this.muted) return;
+    const ctx = this.ctx, t = ctx.currentTime;
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.35);
+    g.gain.setValueAtTime(0.9 * power, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.9);
+    o.connect(g); g.connect(this.master); o.start(t); o.stop(t + 1);
+  },
+  boom() {
+    if (!this.ctx || this.muted) return;
+    const ctx = this.ctx, t = ctx.currentTime;
+    const s = ctx.createBufferSource(); s.buffer = this.noise;
+    const f = ctx.createBiquadFilter(); f.type = "lowpass"; f.frequency.setValueAtTime(2400, t); f.frequency.exponentialRampToValueAtTime(120, t + 0.6);
+    const g = ctx.createGain(); g.gain.setValueAtTime(0.8, t); g.gain.exponentialRampToValueAtTime(0.001, t + 1.1);
+    s.connect(f); f.connect(g); g.connect(this.master); s.start(t); s.stop(t + 1.2);
+    this.drum(1.2);
+  },
+  setMuted(m) { this.muted = m; if (this.master) this.master.gain.setTargetAtTime(m ? 0 : 0.9, this.ctx.currentTime, 0.1); },
+};
+const CUES = [
+  ...SCENES.slice(1).map((s) => ({ t: s.start, fx: "drum" })),
+  { t: 18.6, fx: "boom" }, { t: 19.5, fx: "boom" }, { t: 29.8, fx: "drum" }, { t: 33.7, fx: "boom" }, { t: 36.4, fx: "drum" }, { t: 42.2, fx: "drum" },
+];
+
+/* ---------------- master timeline ---------------- */
+function buildTimeline(root) {
+  const q = gsap.utils.selector(root);
+  const tl = gsap.timeline({ paused: true });
+  const S = (id) => q(`.scene[data-id="${id}"]`)[0];
+  const I = (id) => q(`.scene[data-id="${id}"] > .inner`)[0];
+  const show = (id, t) => tl.set(S(id), { visibility: "visible" }, t);
+  const hide = (id, t) => tl.set(S(id), { visibility: "hidden" }, t);
+  const rise = (sel, t, o = {}) =>
+    tl.fromTo(q(sel + " .c"), { yPercent: 118, rotate: o.rot ?? 5 }, { yPercent: 0, rotate: 0, duration: o.d ?? 1, ease: o.ease ?? "expo.out", stagger: o.s ?? 0.05 }, t);
+  const blurIn = (targets, t, o = {}) =>
+    tl.fromTo(typeof targets === "string" ? q(targets) : targets, { autoAlpha: 0, y: o.y ?? 10, filter: "blur(6px)" },
+      { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: o.d ?? 0.6, stagger: o.s ?? 0.03, ease: "power2.out" }, t);
+  const lines = (sel, t, o = {}) =>
+    tl.fromTo(q(sel + " .ln > span"), { yPercent: 115 }, { yPercent: 0, duration: o.d ?? 0.9, stagger: o.s ?? 0.1, ease: "power3.out" }, t);
+  const count = (sel, to, t, d = 1.4) => {
+    const el = q(sel)[0], o = { v: 0 };
+    tl.fromTo(o, { v: 0 }, { v: to, duration: d, ease: "power2.out", onUpdate: () => (el.textContent = fmt(o.v)) }, t);
+  };
+  const card = (sel, t, side = -1) =>
+    tl.fromTo(q(sel), { x: 110 * side, y: 180, rotation: 8 * side, autoAlpha: 0, filter: "blur(8px)" },
+      { x: 0, y: 0, rotation: -2 * side, autoAlpha: 1, filter: "blur(0px)", duration: 1.1, ease: "smooth" }, t);
+  const exit = (id, t, vars) => tl.to(I(id), { duration: 1.1, ease: "power3.inOut", ...vars }, t);
+
+  /* 0 · PRÓLOGO ------------------------------------------------ */
+  tl.fromTo(q(".s0 .glow.red"), { scale: 0.9, y: -20, autoAlpha: 0, filter: "blur(80px)" }, { scale: 1, y: 0, autoAlpha: 1, filter: "blur(60px)", duration: 1.2, ease: "circ.inOut" }, 0);
+  tl.fromTo(q(".s0 .glow.gold"), { scale: 1.1, y: 20, autoAlpha: 0 }, { scale: 1, y: 0, autoAlpha: 1, duration: 1.2, ease: "back.out(1.3)" }, 0.1);
+  blurIn(".s0 .kicker .c", 0.2, { s: 0.02 });
+  rise(".s0-title", 0.45, { s: 0.08, d: 1.2, rot: 8 });
+  tl.fromTo(q(".s0-img"), { clipPath: "inset(42% 38% 42% 38%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.9, ease: "silk" }, 1.7);
+  tl.fromTo(q(".s0-img img"), { scale: 1.7 }, { scale: 1.05, duration: 2.8, ease: "smooth" }, 1.7);
+  tl.to(q(".s0 .glow"), { autoAlpha: 0, duration: 0.8 }, 2.2);
+  tl.fromTo(q(".s0-title"), { letterSpacing: "-0.01em", scale: 1 }, { letterSpacing: "0.06em", scale: 0.86, duration: 2.6, ease: "silk" }, 1.9);
+  lines(".s0-sub", 2.8);
+
+  /* 1 · CARAL (wipe up) ---------------------------------------- */
+  show("caral", 4.2);
+  tl.fromTo(S("caral"), { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.0, ease: "power3.inOut" }, 4.2);
+  exit("intro", 4.2, { yPercent: -18, filter: "blur(6px) brightness(1)", duration: 1.0 });
+  tl.fromTo(q(".s1 .px img"), { scale: 1.3 }, { scale: 1, duration: 5.6, ease: "none" }, 4.2);
+  hide("intro", 5.3);
+  blurIn(".s1 .kicker .c", 4.9);
+  tl.fromTo(q(".s1-year"), { autoAlpha: 0, filter: "blur(14px)", scale: 0.9 }, { autoAlpha: 1, filter: "blur(0px)", scale: 1, duration: 1.1, ease: "circ.inOut" }, 4.9);
+  count(".s1-count", 5000, 4.9, 1.8);
+  lines(".s1 .lead", 5.5);
+  tl.to(q(".s1 .content"), { y: -40, autoAlpha: 0, filter: "blur(6px)", duration: 0.6, ease: "power2.in" }, 8.8);
+
+  /* 2 · TAHUANTINSUYO (curved overlap) ------------------------- */
+  show("inca", 9.2);
+  tl.fromTo(S("inca"), { clipPath: "circle(0% at 50% 100%)" }, { clipPath: "circle(150% at 50% 100%)", duration: 1.4, ease: "silk" }, 9.2);
+  exit("caral", 9.2, { scale: 1.12, filter: "blur(5px) brightness(.6)", duration: 1.4 });
+  tl.fromTo(q(".s2 .px img"), { scale: 1.35 }, { scale: 1.05, duration: 6.6, ease: "none" }, 9.2);
+  hide("caral", 10.7);
+  blurIn(".s2 .kicker .c", 9.8);
+  rise(".s2-title", 9.95, { s: 0.035, d: 0.95 });
+  card(".s2 [data-person=pachacutec]", 10.6, -1);
+  card(".s2 [data-person=atahualpa]", 10.8, 1);
+  count(".s2-count", 2000000, 11.0, 1.8);
+  blurIn(".s2 .stat small", 11.2);
+  lines(".s2 .lead", 11.4);
+  blurIn(".s2 .tap", 12.4, { y: 0 });
+
+  /* 3 · CONQUISTA (horizontal push + motion blur) -------------- */
+  show("conquista", 15.3);
+  tl.fromTo(S("conquista"), { xPercent: 100 }, { xPercent: 0, duration: 1.1, ease: "power3.inOut" }, 15.3);
+  exit("inca", 15.3, { xPercent: -40, filter: "blur(6px) brightness(.4)" });
+  tl.fromTo(q(".s3 .px img"), { xPercent: 7 }, { xPercent: -6, duration: 6.2, ease: "none" }, 15.3);
+  tl.fromTo(q(".s3 .px img"), { filter: "blur(10px)" }, { filter: "blur(0px)", duration: 1.1, ease: "power2.out", immediateRender: false }, 15.3);
+  hide("inca", 16.5);
+  rise(".s3 .s3-year", 15.9, { s: 0.09, d: 1.2 });
+  blurIn(".s3 .kicker .c", 16.3, { s: 0.02 });
+  card(".s3 [data-person=pizarro]", 16.6, 1);
+  lines(".s3 .lead", 17.0);
+  count(".s3-count", 168, 17.1, 1.3);
+  [18.6, 19.5].forEach((t, i) => {
+    tl.fromTo(q(".s3 .flash"), { autoAlpha: 0 }, { keyframes: { autoAlpha: [0, 1 - i * 0.35, 0] }, duration: 0.5, ease: "none", immediateRender: false }, t);
+    tl.fromTo(q(".s3 .px"), { x: 0 }, { keyframes: { x: [0, -16, 12, -7, 3, 0] }, duration: 0.45, ease: "none", immediateRender: false }, t);
+  });
+
+  /* 4 · REBELIÓN (slash band reveal, paper palette) ------------ */
+  show("rebelion", 21.3);
+  tl.fromTo(S("rebelion"), { clipPath: "inset(50% 0% 50% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.0, ease: "expo.inOut" }, 21.3);
+  exit("conquista", 21.3, { scale: 0.92, filter: "blur(5px) brightness(.8)" });
+  hide("conquista", 22.4);
+  tl.fromTo(q(".s4 .slash"), { scaleX: 0 }, { scaleX: 1, duration: 0.7, stagger: 0.09, ease: "power3.out" }, 21.6);
+  tl.fromTo(q(".s4-img"), { y: 80, scale: 0.9, autoAlpha: 0, filter: "blur(12px)" }, { y: 0, scale: 1, autoAlpha: 1, filter: "blur(0px)", duration: 1.3, ease: "smooth" }, 21.8);
+  tl.fromTo(q(".s4-img img"), { scale: 1 }, { scale: 1.08, duration: 4.5, ease: "none" }, 21.8);
+  rise(".s4-year", 22.0, { s: 0.08 });
+  blurIn(".s4 .kicker .c", 22.4, { s: 0.02 });
+  lines(".s4 .lead", 22.6);
+  blurIn(".s4 .quote .c", 23.6, { s: 0.05, d: 0.5 });
+  tl.to(q(".s4 .slash"), { scaleX: 0, transformOrigin: "100% 50%", duration: 0.6, stagger: 0.06, ease: "power3.in" }, 25.4);
+
+  /* 5 · INDEPENDENCIA (blur-scale crossfade, then wipe) -------- */
+  show("independencia", 26.3);
+  tl.fromTo(S("independencia"), { autoAlpha: 0, scale: 1.14, filter: "blur(14px)" }, { autoAlpha: 1, scale: 1, filter: "blur(0px)", duration: 1.1, ease: "silk" }, 26.3);
+  exit("rebelion", 26.3, { scale: 0.9, filter: "blur(8px) brightness(1)", autoAlpha: 0 });
+  hide("rebelion", 27.4);
+  tl.fromTo(q(".s5a .px img"), { scale: 1.18 }, { scale: 1, duration: 3.8, ease: "none" }, 26.3);
+  blurIn(".s5a .kicker .c", 26.8, { s: 0.02 });
+  rise(".s5a .s5-year", 26.9, { s: 0.08 });
+  card(".s5a [data-person=sanmartin]", 27.3, 1);
+  blurIn(".s5a .quote .c", 27.6, { s: 0.045, d: 0.5 });
+  tl.to(q(".s5a .content"), { y: -40, autoAlpha: 0, duration: 0.5, ease: "power2.in" }, 29.4);
+  tl.fromTo(q(".s5b"), { clipPath: "inset(0% 0% 0% 100%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.9, ease: "power4.inOut" }, 29.6);
+  tl.fromTo(q(".s5b .px img"), { xPercent: 10 }, { xPercent: -7, duration: 3.6, ease: "none" }, 29.6);
+  tl.fromTo(q(".s5b .px img"), { filter: "blur(8px)" }, { filter: "blur(0px)", duration: 0.9, ease: "power2.out", immediateRender: false }, 29.6);
+  rise(".s5b .s5-year", 30.1, { s: 0.08 });
+  blurIn(".s5b .kicker .c", 30.4, { s: 0.02 });
+  card(".s5b [data-person=bolivar]", 30.5, 1);
+  lines(".s5b .lead", 30.7);
+
+  /* 6 · GUERRA DEL PACÍFICO (overlap from top + split panels) -- */
+  show("pacifico", 32.8);
+  tl.fromTo(S("pacifico"), { clipPath: "ellipse(0% 0% at 50% 0%)" }, { clipPath: "ellipse(160% 150% at 50% 0%)", duration: 1.3, ease: "silk" }, 32.8);
+  exit("independencia", 32.8, { yPercent: 14, filter: "blur(6px) brightness(.5)", duration: 1.3 });
+  hide("independencia", 34.2);
+  tl.fromTo(q(".s6a .px img"), { scale: 1.22 }, { scale: 1.04, duration: 4.6, ease: "none" }, 32.8);
+  tl.fromTo(q(".s6a .bob"), { y: 0, rotation: 0 }, { keyframes: { y: [0, -10, 4, -8, 0, -6, 0], rotation: [0, 0.6, -0.4, 0.5, 0, -0.3, 0] }, duration: 4.2, ease: "none" }, 32.8);
+  rise(".s6a .s3-year", 33.4, { s: 0.09, d: 1.2 });
+  blurIn(".s6a .kicker .c", 33.7, { s: 0.02 });
+  card(".s6a [data-person=grau]", 34.0, -1);
+  lines(".s6a .lead", 34.4);
+  tl.fromTo(q(".s6a .flash"), { autoAlpha: 0 }, { keyframes: { autoAlpha: [0, 0.8, 0] }, duration: 0.5, ease: "none", immediateRender: false }, 33.7);
+  tl.to(q(".s6a .content"), { autoAlpha: 0, y: -30, duration: 0.5, ease: "power2.in" }, 36.1);
+  tl.fromTo(q(".s6b .pl"), { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.0, ease: "expo.inOut" }, 36.3);
+  tl.fromTo(q(".s6b .pr"), { clipPath: "inset(0% 0% 0% 100%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.0, ease: "expo.inOut" }, 36.4);
+  tl.fromTo(q(".s6b img"), { scale: 1.35 }, { scale: 1.05, duration: 3.6, ease: "smooth" }, 36.3);
+  blurIn(".s6-quote .c", 37.0, { s: 0.08, d: 0.6, y: 20 });
+  blurIn(".s6-attr .c", 37.9, { s: 0.015 });
+  blurIn(".s6b .panel-name", 38.0, { s: 0.15, y: 20 });
+
+  /* 7 · PERÚ (mosaic zoom-out, like the ship scale 1 → .08) ---- */
+  show("final", 39.8);
+  tl.fromTo(S("final"), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4, ease: "none" }, 39.8);
+  tl.fromTo(q(".mosaic"), { scale: 3.06, filter: "blur(0px) brightness(1)" }, { scale: 1, filter: "blur(0px) brightness(1)", duration: 2.3, ease: "silk" }, 39.9);
+  tl.fromTo(q(".mosaic img"), { scale: 1.4 }, { scale: 1, duration: 2.6, ease: "smooth" }, 39.9);
+  hide("pacifico", 40.3);
+  tl.to(q(".mosaic"), { scale: 0.94, filter: "blur(6px) brightness(.32)", duration: 1.1, ease: "power2.inOut" }, 42.0);
+  rise(".s7-title", 42.15, { s: 0.09, d: 1.2, rot: 8 });
+  lines(".s7 .lead", 42.7);
+  blurIn(".s7 .cta > *", 43.3, { s: 0.12, y: 16 });
+
+  tl.set({}, {}, DUR);
+  tl.progress(1).progress(0);
+  return tl;
+}
+
+/* ---------------- app ---------------- */
+function App() {
+  const root = useRef(null);
+  const st = useRef({ target: 0, current: 0, playing: false, last: 0, drag: false, idleResume: null });
+  const tlRef = useRef(null);
+  const fillRef = useRef(null), headRef = useRef(null), clockRef = useRef(null), ppRef = useRef(null);
+  const [scene, setScene] = useState(0);
+  const [started, setStarted] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [muted, setMuted] = useState(false);
+  const [person, setPerson] = useState(null);
+  const personRef = useRef(null);
+  const debugT = new URLSearchParams(location.search).get("t");
+
+  const setPlay = useCallback((v) => { st.current.playing = v; setPlaying(v); }, []);
+  const seek = useCallback((t) => { st.current.target = gsap.utils.clamp(0, DUR, t); }, []);
+
+  // build timeline + ticker
+  useLayoutEffect(() => {
+    const tl = (tlRef.current = buildTimeline(root.current));
+    const s = st.current;
+    if (debugT !== null) { s.target = s.current = +debugT; tl.time(s.current); setStarted(true); }
+    window.__seek = (t) => { s.target = s.current = t; tl.time(t); };
+    let sceneIdx = 0;
+    const tick = (time, delta) => {
+      const dt = Math.min(delta, 50) / 1000;
+      if (s.playing && !personRef.current && !s.drag) s.target = Math.min(DUR, s.target + dt);
+      const prev = s.current;
+      s.current += (s.target - s.current) * (1 - Math.exp(-dt * 14));
+      if (Math.abs(s.target - s.current) < 0.0005) s.current = s.target;
+      tl.time(s.current);
+      // audio cues only when moving forward at roughly real-time speed
+      if (s.playing && s.current > prev && s.current - prev < 0.25)
+        CUES.forEach((c) => { if (prev < c.t && s.current >= c.t) Sound[c.fx](); });
+      const p = s.current / DUR;
+      fillRef.current.style.transform = `scaleX(${p})`;
+      headRef.current.style.left = p * 100 + "%";
+      clockRef.current.textContent = `${mmss(s.current)} / 00:45`;
+      let idx = 0; SCENES.forEach((sc, i) => { if (s.current >= sc.start - 0.2) idx = i; });
+      if (idx !== sceneIdx) { sceneIdx = idx; setScene(idx); }
+      if (s.playing && s.current >= DUR - 0.01) setPlay(false);
+    };
+    gsap.ticker.add(tick);
+    return () => { gsap.ticker.remove(tick); tl.kill(); };
+  }, []);
+
+  // cursor + parallax
+  useEffect(() => {
+    const cur = document.querySelector(".cursor"), label = cur.querySelector(".ring span");
+    const xd = gsap.quickTo(cur.querySelector(".dot"), "x", { duration: 0.12 }), yd = gsap.quickTo(cur.querySelector(".dot"), "y", { duration: 0.12 });
+    const xr = gsap.quickTo(cur.querySelector(".ring"), "x", { duration: 0.5, ease: "power3" }), yr = gsap.quickTo(cur.querySelector(".ring"), "y", { duration: 0.5, ease: "power3" });
+    const par = { x: 0, y: 0 };
+    const move = (e) => {
+      xd(e.clientX); yd(e.clientY); xr(e.clientX); yr(e.clientY);
+      gsap.to(par, { x: (e.clientX / innerWidth - 0.5) * -24, y: (e.clientY / innerHeight - 0.5) * -16, duration: 1.2, ease: "power3",
+        onUpdate: () => { document.documentElement.style.setProperty("--mx", par.x); document.documentElement.style.setProperty("--my", par.y); } });
+      const t = e.target.closest && e.target.closest("[data-cursor]");
+      cur.classList.toggle("big", !!t);
+      if (t) label.textContent = t.dataset.cursor;
+    };
+    addEventListener("pointermove", move);
+    return () => removeEventListener("pointermove", move);
+  }, []);
+
+  // wheel / touch scrub (the site's scroll-scrub, applied to time)
+  useEffect(() => {
+    const s = st.current;
+    const nudge = () => { clearTimeout(s.idleResume); s.drag = true; s.idleResume = setTimeout(() => (s.drag = false), 900); };
+    const wheel = (e) => { if (personRef.current || !started) return; e.preventDefault(); nudge(); seek(s.target + (e.deltaY + e.deltaX) * 0.006); };
+    let ty = null;
+    const ts = (e) => { if (!e.target.closest("button,.bar")) ty = e.touches[0].clientX + e.touches[0].clientY; };
+    const tm = (e) => { if (ty === null || personRef.current) return; const v = e.touches[0].clientX + e.touches[0].clientY; nudge(); seek(s.target + (ty - v) * 0.03); ty = v; };
+    const te = () => (ty = null);
+    const key = (e) => {
+      if (!started || personRef.current) { if (e.key === "Escape") closePerson(); return; }
+      if (e.code === "Space") { e.preventDefault(); toggle(); }
+      if (e.key === "ArrowRight") goScene(Math.min(SCENES.length - 1, currentIdx() + 1));
+      if (e.key === "ArrowLeft") { const i = currentIdx(); goScene(s.current - SCENES[i].start > 1 ? i : Math.max(0, i - 1)); }
+      if (e.key.toLowerCase() === "m") toggleMute();
+    };
+    addEventListener("wheel", wheel, { passive: false });
+    addEventListener("touchstart", ts, { passive: true }); addEventListener("touchmove", tm, { passive: true }); addEventListener("touchend", te);
+    addEventListener("keydown", key);
+    return () => { removeEventListener("wheel", wheel); removeEventListener("touchstart", ts); removeEventListener("touchmove", tm); removeEventListener("touchend", te); removeEventListener("keydown", key); };
+  });
+
+  const currentIdx = () => { let idx = 0; SCENES.forEach((sc, i) => { if (st.current.current >= sc.start - 0.2) idx = i; }); return idx; };
+  const goScene = (i) => { seek(SCENES[i].start + (i ? 0.9 : 0)); };
+  const flashPP = () => gsap.fromTo(ppRef.current, { autoAlpha: 1, scale: 0.8 }, { autoAlpha: 0, scale: 1.3, duration: 0.7, ease: "power2.out" });
+  const toggle = () => {
+    const s = st.current;
+    if (!s.playing && s.current >= DUR - 0.05) { s.target = 0; }
+    setPlay(!s.playing); flashPP();
+  };
+  const toggleMute = () => { setMuted((m) => { Sound.setMuted(!m); return !m; }); };
+  const replay = () => { st.current.target = 0; setPlay(true); };
+
+  const start = () => {
+    Sound.init();
+    gsap.timeline({ onComplete: () => setStarted(true) })
+      .to(".gate > *", { y: -30, autoAlpha: 0, filter: "blur(8px)", stagger: 0.05, duration: 0.5, ease: "power2.in" })
+      .to(".gate", { clipPath: "inset(0% 0% 100% 0%)", duration: 0.9, ease: "expo.inOut" }, "-=0.2");
+    setTimeout(() => setPlay(true), 700);
+  };
+
+  // progress bar drag
+  const barDown = (e) => {
+    const bar = e.currentTarget, s = st.current;
+    const at = (ev) => { const r = bar.getBoundingClientRect(); seek(((ev.clientX - r.left) / r.width) * DUR); };
+    s.drag = true; at(e); bar.setPointerCapture(e.pointerId);
+    const mv = (ev) => at(ev);
+    const up = () => { s.drag = false; bar.removeEventListener("pointermove", mv); bar.removeEventListener("pointerup", up); };
+    bar.addEventListener("pointermove", mv); bar.addEventListener("pointerup", up);
+  };
+
+  // drawer
+  const openPerson = (id) => {
+    personRef.current = id; setPerson(id);
+    requestAnimationFrame(() => {
+      gsap.timeline()
+        .set(".drawer,.scrim", { visibility: "visible" })
+        .to(".scrim", { opacity: 1, duration: 0.5 }, 0)
+        .fromTo(".drawer", { clipPath: "inset(0% 0% 0% 100%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.9, ease: "expo.inOut" }, 0)
+        .fromTo(".drawer-img img", { scale: 1.35 }, { scale: 1, duration: 1.4, ease: "smooth" }, 0.1)
+        .fromTo(".drawer .c", { yPercent: 118 }, { yPercent: 0, duration: 0.9, stagger: 0.03, ease: "expo.out" }, 0.45)
+        .fromTo(".drawer-body > :not(.mega)", { autoAlpha: 0, y: 14, filter: "blur(6px)" }, { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 0.6, stagger: 0.08 }, 0.6);
+    });
+  };
+  const closePerson = () => {
+    if (!personRef.current) return;
+    gsap.timeline({ onComplete: () => { personRef.current = null; setPerson(null); } })
+      .to(".drawer", { clipPath: "inset(0% 0% 0% 100%)", duration: 0.7, ease: "expo.inOut" })
+      .to(".scrim", { opacity: 0, duration: 0.5 }, 0.2)
+      .set(".drawer,.scrim", { visibility: "hidden" });
+  };
+
+  const P = person && PEOPLE[person];
+  const marquee = SCENES.slice(1).map((s) => `${s.label} · ${s.year}`).join("   —   ");
+
+  return (
+    <>
+      <main className="stage" ref={root}>
+        {/* 0 PRÓLOGO */}
+        <section className="scene s0" data-id="intro"><div className="inner">
+          <div className="glow red" /><div className="glow gold" />
+          <div className="s0-img"><div className="px" style={{ "--d": 1 }}><img src={A("machu")} alt="Machu Picchu" /></div><div className="shade-b" style={{ opacity: .6 }} /></div>
+          <div className="s0-center">
+            <div className="kicker"><Split text="Una historia en 45 segundos" /></div>
+            <h1 className="mega s0-title"><Split text="Perú" /></h1>
+            <Lines className="s0-sub" lines={["De Caral al Bicentenario"]} />
+          </div>
+        </div></section>
+
+        {/* 1 CARAL */}
+        <section className="scene s1" data-id="caral"><div className="inner">
+          <div className="px" style={{ "--d": 1.2 }}><img src={A("caral")} alt="Ciudad sagrada de Caral" /></div>
+          <div className="shade-l" />
+          <div className="content bl stack">
+            <div className="kicker"><Split text="Cap. 01 — Valle de Supe" /></div>
+            <div className="mega s1-year"><span className="s1-count">0</span></div>
+            <div className="kicker" style={{ marginTop: "-1vh" }}>años de antigüedad</div>
+            <Lines className="lead" lines={["Caral, la civilización", <>más antigua de <em>América</em>.</>]} />
+          </div>
+        </div></section>
+
+        {/* 2 TAHUANTINSUYO */}
+        <section className="scene s2" data-id="inca"><div className="inner">
+          <div className="px" style={{ "--d": 1.4 }}><img src={A("machu")} alt="Machu Picchu" style={{ objectPosition: "60% 50%" }} /></div>
+          <div className="shade-b" /><div className="shade-l" style={{ opacity: .7 }} />
+          <div className="content tl stack">
+            <div className="kicker"><Split text="Cap. 02 — 1438 · Imperio Inca" /></div>
+            <h2 className="mega s2-title"><Split text="Tahuantinsuyo" /></h2>
+          </div>
+          <div className="content bl stack">
+            <div className="stat"><span className="s2-count">0</span><small>km²</small></div>
+            <Lines className="lead" lines={["Del sur de Colombia", <>al centro de <em>Chile</em>.</>]} />
+          </div>
+          <Card id="pachacutec" onOpen={openPerson} style={{ right: "calc(clamp(130px,15vw,230px) + 7vw)", bottom: "18vh" }} />
+          <Card id="atahualpa" onOpen={openPerson} style={{ right: "4vw", bottom: "26vh" }} />
+          <div className="content kicker tap" style={{ right: "4vw", bottom: "calc(26vh + clamp(130px,15vw,230px) * 1.333 + 18px)" }}>Toca un retrato ↘</div>
+        </div></section>
+
+        {/* 3 CONQUISTA */}
+        <section className="scene s3" data-id="conquista"><div className="inner">
+          <div className="px" style={{ "--d": 1.6 }}><img src={A("captura")} alt="La captura de Atahualpa, Juan Lepiani" /></div>
+          <div className="shade-b" />
+          <div className="mega outline s3-year"><Split text="1532" /></div>
+          <div className="flash" />
+          <div className="content bl stack">
+            <div className="kicker"><Split text="Cap. 03 — 16 nov 1532 · Cajamarca" /></div>
+            <Lines className="lead" lines={[<>Con <em className="s3-count">0</em> hombres,</>, "Pizarro captura", "al Inca Atahualpa."]} />
+          </div>
+          <Card id="pizarro" onOpen={openPerson} style={{ right: "6vw", bottom: "20vh" }} />
+        </div></section>
+
+        {/* 4 REBELIÓN */}
+        <section className="scene s4" data-id="rebelion"><div className="inner">
+          <div className="slash" style={{ left: 0, top: "18vh", width: "62vw" }} />
+          <div className="slash" style={{ left: 0, top: "calc(18vh + 26px)", width: "38vw" }} />
+          <div className="slash" style={{ left: 0, bottom: "12vh", width: "80vw" }} />
+          <button className="s4-img" data-cursor="Ver" onClick={() => openPerson("tupac")} aria-label="Ver ficha de Túpac Amaru II"><img src={A("tupac")} alt="Túpac Amaru II" /></button>
+          <div className="content tl stack" style={{ top: "24vh" }}>
+            <div className="kicker"><Split text="Cap. 04 — Tinta, Cusco" /></div>
+            <div className="mega s4-year"><Split text="1780" /></div>
+            <Lines className="lead" lines={["Túpac Amaru II", "desafía a la Corona."]} />
+            <div className="quote"><Split text="«Tú por opresor, y yo por libertador, merecemos la muerte.»" by="words" /></div>
+          </div>
+        </div></section>
+
+        {/* 5 INDEPENDENCIA */}
+        <section className="scene s5" data-id="independencia"><div className="inner">
+          <div className="s5a" style={{ position: "absolute", inset: 0, zIndex: 1 }}>
+            <div className="px" style={{ "--d": 1.2 }}><img src={A("proclamacion")} alt="Proclamación de la Independencia, Juan Lepiani" /></div>
+            <div className="shade-b" />
+            <div className="content bl stack">
+              <div className="kicker"><Split text="Cap. 05 — 28 de julio · Lima" /></div>
+              <div className="mega s5-year"><Split text="1821" /></div>
+              <div className="quote"><Split text="«El Perú es desde este momento libre e independiente…»" by="words" /></div>
+            </div>
+            <Card id="sanmartin" onOpen={openPerson} style={{ right: "6vw", bottom: "20vh" }} />
+          </div>
+          <div className="s5b">
+            <div className="px" style={{ "--d": 1.6 }}><img src={A("ayacucho")} alt="Batalla de Ayacucho, Martín Tovar y Tovar" /></div>
+            <div className="shade-b" />
+            <div className="content bl stack">
+              <div className="kicker"><Split text="9 de diciembre · Pampa de Quinua" /></div>
+              <div className="mega s5-year"><Split text="1824" /></div>
+              <Lines className="lead" lines={["Ayacucho sella la", <>libertad de <em>Sudamérica</em>.</>]} />
+            </div>
+            <Card id="bolivar" onOpen={openPerson} style={{ right: "6vw", bottom: "20vh" }} />
+          </div>
+        </div></section>
+
+        {/* 6 GUERRA DEL PACÍFICO */}
+        <section className="scene s6" data-id="pacifico"><div className="inner">
+          <div className="s6a" style={{ position: "absolute", inset: 0, zIndex: 1 }}>
+            <div className="bob" style={{ position: "absolute", inset: 0 }}><div className="px" style={{ "--d": 1.4 }}><img src={A("angamos")} alt="Combate naval de Angamos" /></div></div>
+            <div className="shade-b" />
+            <div className="mega outline s3-year"><Split text="1879" /></div>
+            <div className="flash" />
+            <div className="content bl stack">
+              <div className="kicker"><Split text="Cap. 06 — Guerra del Pacífico · 1879–1883" /></div>
+              <Lines className="lead" lines={["8 oct 1879: Grau cae", <>a bordo del <em>Huáscar</em>.</>]} />
+            </div>
+            <Card id="grau" onOpen={openPerson} style={{ right: "6vw", bottom: "20vh" }} />
+          </div>
+          <div className="s6b">
+            <div className="pl" data-cursor="Ver" onClick={() => openPerson("bolognesi")}>
+              <img className="cover" src={A("bolognesi")} alt="Francisco Bolognesi" />
+              <div className="shade-b" />
+              <div className="panel-name"><span className="kicker">Arica · 1880</span><span className="mega">Bolognesi</span></div>
+            </div>
+            <div className="pr" data-cursor="Ver" onClick={() => openPerson("caceres")}>
+              <img className="cover" src={A("caceres")} alt="Andrés Avelino Cáceres" />
+              <div className="shade-b" />
+              <div className="panel-name"><span className="kicker">La Breña · 1881–1883</span><span className="mega">Cáceres</span></div>
+            </div>
+          </div>
+          <div className="s6-quote"><Split text="«…hasta quemar el último cartucho.»" by="words" /></div>
+          <div className="kicker s6-attr"><Split text="Francisco Bolognesi · Morro de Arica" /></div>
+        </div></section>
+
+        {/* 7 PERÚ */}
+        <section className="scene s7" data-id="final"><div className="inner">
+          <div className="mosaic">
+            {["caral", "pachacutec", "captura", "tupac", "vinicunca", "proclamacion", "ayacucho", "angamos", "grau"].map((f) => (
+              <div key={f}><img className="cover" src={A(f)} alt="" /></div>
+            ))}
+          </div>
+          <div className="s7-center">
+            <h2 className="mega s7-title"><Split text="Perú" /></h2>
+            <Lines className="lead" lines={[<>5000 años, <em>una sola historia</em>.</>]} style={{ maxWidth: "none" }} />
+            <div className="cta" style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginTop: "1vh" }}>
+              <button className="btn solid" data-cursor="↺" onClick={replay}>Volver a ver</button>
+              <button className="btn" data-cursor="Ir" onClick={() => goScene(1)}>Explorar capítulos</button>
+            </div>
+          </div>
+        </div></section>
+      </main>
+
+      <div className="vignette" /><div className="grain" />
+
+      <header className="hud-top">
+        <div className="logo"><i /> PERÚ <span>Historia</span></div>
+        <div className="hud-r">
+          <span className="clock" ref={clockRef}>00:00 / 00:45</span>
+          <button className="snd-btn" data-cursor={muted ? "On" : "Off"} onClick={toggleMute} aria-label="Sonido">
+            <span className={"snd" + (muted ? " off" : "")}><b /><b /><b /><b /></span>{muted ? "Mute" : "Sonido"}
+          </button>
+          <button data-cursor={playing ? "Pausa" : "Play"} onClick={toggle} style={{ fontSize: 11, letterSpacing: ".2em" }}>{playing ? "❚❚ PAUSA" : "▶ PLAY"}</button>
+        </div>
+      </header>
+      <div className="marquee"><div><span>{marquee}</span><span>{marquee}</span></div></div>
+      <div className="hint">Rueda / arrastra · viaja en el tiempo<br />Espacio · pausa &nbsp; ← → · capítulos</div>
+      <div className="pp" ref={ppRef}>{playing ? "▶" : "❚❚"}</div>
+
+      <footer className="hud-bot">
+        <nav className="chapters">
+          {SCENES.map((s, i) => (
+            <button key={s.id} className={"chap" + (i === scene ? " on" : "")} data-cursor="Ir" onClick={() => goScene(i)}
+              onMouseEnter={(e) => scramble(e.currentTarget.querySelector(".l"), s.label)}>
+              <span className="n">{String(i).padStart(2, "0")} {s.year && "· " + s.year}</span>
+              <span className="l">{s.label}</span>
+            </button>
+          ))}
+        </nav>
+        <div className="bar" onPointerDown={barDown} data-cursor="Ir">
+          <div className="track">
+            <div className="fill" ref={fillRef} />
+            {SCENES.slice(1).map((s) => <div key={s.id} className="tick" style={{ left: (s.start / DUR) * 100 + "%" }} />)}
+            <div className="head" ref={headRef} />
+          </div>
+        </div>
+      </footer>
+
+      <div className="scrim" onClick={closePerson} />
+      <aside className="drawer" aria-hidden={!P}>
+        {P && (<>
+          <button className="close" onClick={closePerson} data-cursor="Cerrar" aria-label="Cerrar">✕</button>
+          <div className="drawer-img"><img src={A(P.img)} alt={P.name} /></div>
+          <div className="drawer-body">
+            <span className="kicker"><b>●</b>&nbsp; {P.role}</span>
+            <h3 className="mega"><Split text={P.name} /></h3>
+            <p>{P.bio}</p>
+            <span className="credit">{P.credit} · Wikimedia Commons, dominio público</span>
+          </div>
+        </>)}
+      </aside>
+
+      {!started && debugT === null && (
+        <div className="gate">
+          <span className="kicker"><b>●</b>&nbsp; Experiencia interactiva · 45 s</span>
+          <h1 className="mega">Perú</h1>
+          <p>De Caral a la Guerra del Pacífico. Usa la rueda del ratón o arrastra para avanzar y retroceder en el tiempo, y toca los retratos para conocer a sus protagonistas.</p>
+          <button className="btn solid" data-cursor="▶" onClick={start}
+            onMouseMove={(e) => { const r = e.currentTarget.getBoundingClientRect(); gsap.to(e.currentTarget, { x: (e.clientX - r.left - r.width / 2) * 0.3, y: (e.clientY - r.top - r.height / 2) * 0.3, duration: 0.4 }); }}
+            onMouseLeave={(e) => gsap.to(e.currentTarget, { x: 0, y: 0, duration: 0.6, ease: "elastic.out(1,0.4)" })}>
+            Comenzar &nbsp;▶
+          </button>
+        </div>
+      )}
+
+      <div className="cursor"><div className="ring"><span /></div><div className="dot" /></div>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
